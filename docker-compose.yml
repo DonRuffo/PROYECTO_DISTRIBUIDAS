@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ./servidor1
+    container_name: app
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+    depends_on:
+      - db
+      - mysql_replica
+
+  app1:
+    build:
+      context: ./servidor2
+    container_name: app1
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_APP=app1.py
+    depends_on:
+      - db
+      - mysql_replica
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+      - app1
+
+  db:
+    image: mysql:8
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_informacion
+    ports:
+      - "3306:3306"
+
+  mysql_replica:
+    image: mysql:8
+    container_name: mysql_replica
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_informacion
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./db-init:/docker-entrypoint-initdb.d
