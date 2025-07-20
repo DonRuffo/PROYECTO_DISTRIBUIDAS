@@ -24,6 +24,18 @@ services:
     depends_on:
       - db
       - mysql_replica
+  
+  app2:
+    build:
+      context: ./servidor3
+    container_name: app2
+    ports:
+      - "5002:5002"
+    environment:
+      - FLASK_APP=app2.py
+    depends_on:
+      - db
+      - mysql_replica
 
   nginx:
     image: nginx:alpine
@@ -35,6 +47,7 @@ services:
     depends_on:
       - app
       - app1
+      - app2
 
   db:
     image: mysql:8
